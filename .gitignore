@@ -1,0 +1,77 @@
+# ------------------------------------------------------
+# Root Gitignore for Monorepo (Foundry + Next.js)
+# ------------------------------------------------------
+
+# ------------------
+# Global
+# ------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+*.tmp
+*.swp
+*.lock
+*.cache
+
+# Ignore environment variables (root + subfolders)
+.env
+.env.*
+!.env.example
+
+# Node modules (frontend)
+node_modules/
+*/node_modules/
+
+# ------------------
+# Next.js specific
+# ------------------
+.next/
+out/
+.next.static/
+dist/
+build/
+
+# Next.js generated types
+.next/types/
+
+# Pnpm/Yarn/NPM
+.pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+
+# Turbo / monorepo tools
+turbo/
+.turbo/
+
+# ------------------
+# Forge / Foundry (contracts)
+# ------------------
+
+# Foundry cache + build dirs
+contracts/cache/
+contracts/out/
+
+# Broadcast files from forge script runs
+contracts/broadcast/
+
+# Coverage data
+contracts/coverage/
+
+# Foundry temporary files
+contracts/lib/
+
+# ------------------
+# OS specific
+# ------------------
+# macOS
+*.DS_Store
+
+# Windows
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
