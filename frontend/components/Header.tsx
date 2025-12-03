@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -43,9 +44,10 @@ export default function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <button className="px-6 py-2 text-foreground font-medium hover:text-primary transition-colors text-sm">
+            {/* <button className="px-6 py-2 text-foreground font-medium hover:text-primary transition-colors text-sm">
               Sign In
-            </button>
+            </button> */}
+            <ConnectButton />
             <button className="px-6 py-2 bg-primary text-white font-bold hover:bg-primary/90 transition-colors duration-200 text-sm border-2 border-primary">
               Launch App
             </button>

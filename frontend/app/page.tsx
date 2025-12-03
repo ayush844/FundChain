@@ -1,3 +1,9 @@
+"use client"
+
+import { useEffect } from "react";
+import { useAccount } from "wagmi";
+import { useRouter } from "next/navigation"
+
 import Header from "@/components/Header"
 import Hero from "@/components/Hero"
 import Features from "@/components/Features"
@@ -7,9 +13,20 @@ import CTA from "@/components/Cta"
 import Footer from "@/components/Footer"
 
 export default function Home() {
+
+  const { isConnected } = useAccount();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isConnected) {
+      router.push("/projects");
+    }
+  }, [isConnected, router]);
+
+
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      {/* <Header /> */}
       <Hero />
       <Features />
       <HowItWorks />
