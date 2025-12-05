@@ -17,33 +17,42 @@ export type CampaignItem = {
 
 export function useFactoryList() {
   // Read the getAllCampaigns() function from the factory
-  const { data, isLoading, error } = useReadContract({
+  const { data, isLoading, error, refetch } = useReadContract({
     address: FACTORY_ADDRESS,
     abi: factoryAbi.abi,
     functionName: "getAllCampaigns", 
     query: {
       refetchOnWindowFocus: false,
       refetchInterval: false,
+      refetchOnReconnect: false,
+      staleTime: 5000, // 5 seconds — avoids UI flicker
     },
   });
 
   // Convert raw data into typed JS objects
-  const campaigns: CampaignItem[] | undefined = (data as any[] | undefined)?.map(
-    (c: any) => {
-      // Some ABIs decode structs as arrays + named props; handle both cases
-      const CampaignAddress = c?.CampaignAddress ?? c[0];
-      const owner = c?.owner ?? c[1];
-      const name = c?.name ?? c[2];
-      const creationTime =
-        (c?.creationTime?.toString && c.creationTime.toString()) ??
-        (c[3] && c[3].toString());
-      return { CampaignAddress, owner, name, creationTime };
-    }
-  );
+  const campaigns: CampaignItem[] | undefined = Array.isArray(data)
+    ? data.map((c: any) => {
+        const CampaignAddress = c?.CampaignAddress ?? c[0];
+        const owner = c?.owner ?? c[1];
+        const name = c?.name ?? c[2];
+        const creationTime =
+          c?.creationTime?.toString?.() ??
+          c[3]?.toString?.() ??
+          "0";
+
+        return {
+          CampaignAddress,
+          owner,
+          name,
+          creationTime,
+        };
+      })
+    : undefined;
 
   return {
     campaigns,
     isLoading,
     error,
+    refetch
   };
 }
