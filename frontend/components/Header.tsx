@@ -115,7 +115,7 @@ export default function Header() {
         {/* Mobile Navigation */}
         {isOpen && (
           <nav className="md:hidden mt-4 pt-4 border-t-2 border-primary flex flex-col gap-4">
-            <div className="md:hidden mb-2 w-2 flex">
+            <div className="md:hidden mb-2 w-full flex justify-center items-center">
               <StyledConnectButton />
             </div>
             {isLanding && (
