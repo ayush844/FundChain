@@ -182,26 +182,26 @@ export default function CampaignDetailPage() {
           <p className="text-foreground/70 mt-2 leading-relaxed">
             {descriptionStr || "No description provided for this campaign."}
           </p>
-{/* Campaign Address */}
-<div className="mt-4 flex items-center gap-2">
-  <span className="text-sm text-foreground/70">Campaign Address:</span>
+          {/* Campaign Address */}
+          <div className="mt-4 flex items-center gap-2">
+            <span className="text-sm text-foreground/70">Campaign Address:</span>
 
-  <span className="text-sm font-mono break-all text-primary">
-    {address}
-  </span>
+            <span className="text-sm font-mono break-all text-primary">
+              {address}
+            </span>
 
-  <button
-    onClick={handleCopyAddress}
-    aria-label="Copy address"
-    className="ml-1 inline-flex items-center justify-center p-1.5 border rounded hover:bg-primary/10 text-primary"
-  >
-    {!copied ? (
-      <Copy size={14} />
-    ) : (
-      <Check size={14} className="text-green-500" />
-    )}
-  </button>
-</div>
+            <button
+              onClick={handleCopyAddress}
+              aria-label="Copy address"
+              className="ml-1 inline-flex items-center justify-center p-1.5 border rounded hover:bg-primary/10 text-primary"
+            >
+              {!copied ? (
+                <Copy size={14} />
+              ) : (
+                <Check size={14} className="text-green-500" />
+              )}
+            </button>
+          </div>
 
 
           {/* Owner-only actions */}

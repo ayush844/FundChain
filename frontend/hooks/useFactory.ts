@@ -6,7 +6,7 @@ import { useReadContract } from "wagmi";
 import factoryAbi from "@/contracts/CrowdfundingFactory.json";
 import { ethers } from "ethers";
 
-export const FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // replace with your factory address
+export const FACTORY_ADDRESS = process.env.NEXT_PUBLIC_CAMPAIGN_FACTORY;
 
 export type CampaignItem = {
   CampaignAddress: string;

@@ -7,7 +7,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import factoryAbi from "@/contracts/CrowdfundingFactory.json";
 
-export const FACTORY_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const FACTORY_ADDRESS = process.env.NEXT_PUBLIC_CAMPAIGN_FACTORY;
 
 export default function CreateCampaignPage() {
   const router = useRouter();
