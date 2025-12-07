@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import StyledConnectButton from "@/components/StyledConnectButton";
+
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -88,17 +90,17 @@ export default function Header() {
 
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center gap-4">
-            <ConnectButton />
+            <StyledConnectButton />
 
             {/* Only show on landing */}
-            {isLanding && (
+            {/* {isLanding && (
               <Link
                 href="/projects"
                 className="px-6 py-2 bg-primary text-white font-bold hover:bg-primary/90 transition-colors duration-200 text-sm border-2 border-primary"
               >
                 Launch App
               </Link>
-            )}
+            )} */}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -113,6 +115,9 @@ export default function Header() {
         {/* Mobile Navigation */}
         {isOpen && (
           <nav className="md:hidden mt-4 pt-4 border-t-2 border-primary flex flex-col gap-4">
+            <div className="md:hidden mb-2 w-2 flex">
+              <StyledConnectButton />
+            </div>
             {isLanding && (
               <>
                 <Link
@@ -133,13 +138,13 @@ export default function Header() {
                 >
                   Impact
                 </Link>
-
+{/* 
                 <Link
                   href="/projects"
                   className="w-full px-6 py-3 bg-primary text-white font-bold hover:bg-primary/90 transition-colors duration-200 border-2 border-primary mt-2 text-center"
                 >
                   Launch App
-                </Link>
+                </Link> */}
               </>
             )}
 
