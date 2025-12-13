@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useRequireWallet } from "@/hooks/useRequireWallet";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import campaignAbi from "@/contracts/Crowdfunding.json";
-import { formatEther } from "viem";
+import { formatEther, parseEther } from "viem";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -31,6 +31,93 @@ export default function CampaignDetailPage() {
   const address = path?.split("/").pop() ?? "";
 
   const [copied, setCopied] = useState(false);
+
+  const [showTierModal, setShowTierModal] = useState(false);
+  const [tierName, setTierName] = useState("");
+  const [tierAmount, setTierAmount] = useState("");
+
+
+  const [showDeadlineModal, setShowDeadlineModal] = useState(false);
+  const [daysToAdd, setDaysToAdd] = useState("");
+
+  const [fundingTierIndex, setFundingTierIndex] = useState<number | null>(null);
+
+
+  const { writeContract, data: txHash, isPending } = useWriteContract();
+
+  const { isLoading: txConfirming, isSuccess: txSuccess } =
+    useWaitForTransactionReceipt({
+      hash: txHash,
+    });
+
+    const handleCreateTier = async () => {
+      writeContract({
+        address: address as `0x${string}`,
+        abi: campaignAbi.abi,
+        functionName: "addTier",
+        args: [tierName, parseEther(tierAmount)],
+      });
+    };
+
+    const handleDeleteTier = (index: number) => {
+      writeContract({
+        address: address as `0x${string}`,
+        abi: campaignAbi.abi,
+        functionName: "removeTier",
+        args: [index],
+      });
+    };
+
+    const handleExtendDeadline = () => {
+      writeContract({
+        address: address as `0x${string}`,
+        abi: campaignAbi.abi,
+        functionName: "extendDeadline",
+        args: [BigInt(daysToAdd)],
+      });
+    };
+
+    const handleTogglePause = () => {
+      writeContract({
+        address: address as `0x${string}`,
+        abi: campaignAbi.abi,
+        functionName: "togglePause",
+      });
+    };
+
+  const handleFundTier = (tierIndex: number, amountWei: bigint) => {
+    setFundingTierIndex(tierIndex);
+    writeContract({
+      address: address as `0x${string}`,
+      abi: campaignAbi.abi,
+      functionName: "fund",
+      args: [tierIndex],
+      value: amountWei, // 💰 THIS IS IMPORTANT
+    });
+  };
+
+
+    useEffect(() => {
+      if (txSuccess) {
+        // close modal
+        setShowTierModal(false);
+        setShowDeadlineModal(false);
+
+        // reset inputs
+        setTierName("");
+        setTierAmount("");
+        setDaysToAdd("");
+
+        setFundingTierIndex(null);
+      }
+    }, [txSuccess]);
+
+    useEffect(() => {
+      if (!isPending && !txConfirming) {
+        setFundingTierIndex(null);
+      }
+    }, [isPending, txConfirming]);
+
 
   const handleCopyAddress = async () => {
     await navigator.clipboard.writeText(address);
@@ -133,18 +220,25 @@ export default function CampaignDetailPage() {
       ? new Date(Number(deadline) * 1000).toLocaleDateString()
       : "-";
 
-  const statusLabel = useMemo(() => {
-    switch (Number(status)) {
-      case 0:
-        return { text: "Active", color: "text-green-400" };
-      case 1:
-        return { text: "Successful", color: "text-blue-400" };
-      case 2:
-        return { text: "Failed", color: "text-red-400" };
-      default:
-        return { text: "Unknown", color: "text-gray-400" };
-    }
-  }, [status]);
+    const statusLabel = useMemo(() => {
+      // 🛑 PAUSED OVERRIDES EVERYTHING
+      if (paused) {
+        return { text: "Paused", color: "text-yellow-500" };
+      }
+
+      switch (Number(status)) {
+        case 0:
+          return { text: "Active", color: "text-green-400" };
+        case 1:
+          return { text: "Successful", color: "text-blue-400" };
+        case 2:
+          return { text: "Failed", color: "text-red-400" };
+        default:
+          return { text: "Unknown", color: "text-gray-400" };
+      }
+    }, [status, paused]);
+
+    const isCampaignOver = Number(status) !== 0;
 
   /* ------------------ SAFE CONDITIONAL UI ------------------ */
 
@@ -155,6 +249,79 @@ export default function CampaignDetailPage() {
 
   return (
     <section className="min-h-screen bg-background p-6 relative">
+
+{showTierModal && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg w-full max-w-md">
+      <h3 className="text-lg font-semibold mb-4">Create Tier</h3>
+
+      <input
+        placeholder="Tier name"
+        value={tierName}
+        onChange={(e) => setTierName(e.target.value)}
+        className="w-full border p-2 rounded mb-3"
+      />
+
+      <input
+        placeholder="Amount (ETH)"
+        value={tierAmount}
+        onChange={(e) => setTierAmount(e.target.value)}
+        className="w-full border p-2 rounded mb-4"
+      />
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => setShowTierModal(false)}
+          className="px-4 py-2 text-sm border rounded"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleCreateTier}
+          disabled={isPending}
+          className="px-4 py-2 text-sm bg-primary text-white rounded"
+        >
+          {isPending ? "Creating..." : "Create"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{showDeadlineModal && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg w-full max-w-sm">
+      <h3 className="font-semibold mb-4">Extend Deadline</h3>
+
+      <input
+        type="number"
+        placeholder="Days to add"
+        value={daysToAdd}
+        onChange={(e) => setDaysToAdd(e.target.value)}
+        className="w-full border p-2 rounded mb-4"
+      />
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => setShowDeadlineModal(false)}
+          className="border px-4 py-2 rounded text-sm"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleExtendDeadline}
+          className="bg-secondary text-white px-4 py-2 rounded text-sm"
+        >
+          Extend
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
       {/* subtle rings */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
         <div className="absolute -top-40 -left-40 w-72 h-72 border border-primary/30 rounded-full" />
@@ -173,6 +340,13 @@ export default function CampaignDetailPage() {
 
         {/* HEADER CARD */}
         <div className="mt-6 bg-white rounded-lg shadow-md p-6 border border-gray-200">
+
+          {paused && (
+            <div className="text-xs text-yellow-600 mt-2">
+              Campaign is currently paused
+            </div>
+          )}
+
 
           {/* NAME + DESCRIPTION */}
           <h1 className="text-3xl font-bold text-foreground">
@@ -207,25 +381,29 @@ export default function CampaignDetailPage() {
           {/* Owner-only actions */}
           {isOwner && (
             <div className="mt-6 flex flex-wrap gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm rounded border border-primary hover:bg-primary/90">
+              <button onClick={() => setShowTierModal(true)} disabled={isPending || txConfirming} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm rounded border border-primary hover:bg-primary/90">
                 <Plus size={16} /> Create New Tier
               </button>
 
-              <button className="flex items-center gap-2 px-4 py-2 bg-secondary text-white text-sm rounded border border-secondary hover:bg-secondary/90">
+              <button onClick={() => setShowDeadlineModal(true)} className="flex items-center gap-2 px-4 py-2 bg-secondary text-white text-sm rounded border border-secondary hover:bg-secondary/90">
                 <CalendarPlus size={16} /> Extend Deadline
               </button>
 
-              <button className="flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm rounded border border-accent hover:bg-accent/90">
-                {paused ? (
-                  <>
-                    <Play size={16} /> Unpause Campaign
-                  </>
-                ) : (
-                  <>
-                    <Pause size={16} /> Pause Campaign
-                  </>
-                )}
-              </button>
+<button
+  onClick={handleTogglePause}
+  className="flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm rounded"
+>
+  {paused ? (
+    <>
+      <Play size={16} /> Unpause Campaign
+    </>
+  ) : (
+    <>
+      <Pause size={16} /> Pause Campaign
+    </>
+  )}
+</button>
+
 
               {Number(status) === 1 && (
                 <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm rounded border border-green-700 hover:bg-green-700">
@@ -314,6 +492,7 @@ export default function CampaignDetailPage() {
                 const amountWei = t?.amount ?? t[1];
                 const backers = t?.backers?.toString?.() ?? t[2]?.toString?.() ?? "0";
                 const amountEth = amountWei ? Number(formatEther(amountWei as bigint)) : 0;
+                const isThisTierFunding = fundingTierIndex === i && (isPending || txConfirming);
 
                 return (
                   <div
@@ -330,9 +509,36 @@ export default function CampaignDetailPage() {
                       </div>
                     </div>
 
-                    <button className="mt-4 w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 text-sm font-medium">
-                      Fund this Tier
+                    <button
+                      disabled={paused || isCampaignOver || isPending || txConfirming}
+                      onClick={() => handleFundTier(i, amountWei as bigint)}
+                      className={`mt-4 w-full px-4 py-2 rounded text-sm font-medium
+                        ${
+                          paused
+                            ? "bg-gray-300 cursor-not-allowed"
+                            : "bg-primary text-white hover:bg-primary/90"
+                        }`}
+                    >
+                      {paused
+                        ? "Paused"
+                        : isCampaignOver
+                        ? "Campaign Ended"
+                        : isThisTierFunding
+                        ? "Funding..."
+                        : "Fund this Tier"}
                     </button>
+
+                    <div className="w-full flex items-center justify-center">
+                    {isOwner && (
+                      <button
+                        onClick={() => handleDeleteTier(i)}
+                        className="mt-2 text-base text-red-600 hover:underline flex items-center cursor-pointer"
+                      >
+                        Delete Tier
+                      </button>
+
+                    )}
+                    </div>
                   </div>
                 );
               })}

@@ -10,7 +10,7 @@ import { useCampaignStats } from "@/hooks/useCampaignStats";
 
 function truncateAddress(addr?: string) {
   if (!addr) return "";
-  return addr.length > 12 ? `${addr.slice(0, 8)}...${addr.slice(-6)}` : addr;
+  return addr.length > 14 ? `${addr.slice(0, 8)}...${addr.slice(-6)}` : addr;
 }
 
 export default function DashboardPage() {
