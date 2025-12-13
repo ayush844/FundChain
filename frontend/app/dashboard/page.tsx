@@ -31,6 +31,15 @@ export default function DashboardPage() {
   // Fetch stats in ONE HOOK CALL
   const { stats, isLoading: statsLoading } = useCampaignStats(campaignAddresses);
 
+  const totalRaisedEth = useMemo(() => {
+    if (!stats || stats.length === 0) return 0;
+
+    return stats.reduce((sum, s) => {
+      return sum + (s?.balanceEth ?? 0);
+    }, 0);
+  }, [stats]);
+
+
   const handleCopy = async () => {
     if (!address) return;
     await navigator.clipboard.writeText(address);
@@ -127,7 +136,7 @@ export default function DashboardPage() {
                 <div>
                   <div className="text-xs text-foreground/70">Total Raised</div>
                   <div className="text-lg font-semibold text-foreground">
-                    Coming Soon
+                    {statsLoading ? "Loading…" : `${totalRaisedEth.toFixed(4)} ETH`}
                   </div>
                 </div>
               </div>
