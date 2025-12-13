@@ -381,17 +381,18 @@ export default function CampaignDetailPage() {
           {/* Owner-only actions */}
           {isOwner && (
             <div className="mt-6 flex flex-wrap gap-3">
-              <button onClick={() => setShowTierModal(true)} disabled={isPending || txConfirming} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm rounded border border-primary hover:bg-primary/90">
+              <button onClick={() => setShowTierModal(true)} disabled={isPending || txConfirming || Number(status) === 1 || Number(status) === 2} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm rounded border border-primary hover:bg-primary/90 disabled:bg-accent/50">
                 <Plus size={16} /> Create New Tier
               </button>
 
-              <button onClick={() => setShowDeadlineModal(true)} className="flex items-center gap-2 px-4 py-2 bg-secondary text-white text-sm rounded border border-secondary hover:bg-secondary/90">
+              <button onClick={() => setShowDeadlineModal(true)} disabled={(Number(status) === 1) || (Number(status) === 2)} className="flex items-center gap-2 px-4 py-2 bg-secondary text-white text-sm rounded border border-secondary hover:bg-secondary/90 disabled:bg-accent/50">
                 <CalendarPlus size={16} /> Extend Deadline
               </button>
 
 <button
   onClick={handleTogglePause}
-  className="flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm rounded"
+  disabled={(Number(status) === 1) || (Number(status) === 2) }
+  className="flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm rounded disabled:bg-accent/50"
 >
   {paused ? (
     <>

@@ -190,63 +190,86 @@ export default function DashboardPage() {
                   };
 
                   return (
-                    <article
-                      key={c.CampaignAddress}
-                      className="bg-white rounded-lg p-4 shadow-md border border-gray-100"
-                    >
-                      {/* HEADER */}
-                    <div className="flex items-start justify-between gap-3">
-                      {/* LEFT INFO (truncate properly) */}
-                      <div className="min-w-0">
-                        <h4 className="text-sm font-semibold truncate">{c.name}</h4>
+                  <article
+                    key={c.CampaignAddress}
+                    className="
+                      flex flex-col gap-4
+                      rounded-lg border border-gray-200 bg-white
+                      p-4 shadow-sm
+                      transition hover:shadow-md
+                    "
+                  >
+                    {/* TITLE */}
+                    <div>
+                      <h4 className="text-base font-semibold text-foreground leading-tight">
+                        {c.name}
+                      </h4>
 
-                        <p className="text-xs text-foreground/60 mt-1 truncate">
-                          {truncateAddress(c.CampaignAddress)} •{" "}
-                          {new Date(Number(c.creationTime) * 1000).toLocaleDateString()}
-                        </p>
-                      </div>
+                      <p className="mt-1 text-xs text-foreground/60 break-all">
+                        {truncateAddress(c.CampaignAddress)}
+                      </p>
 
-                      {/* VIEW BUTTON (fixed width, never shrinks) */}
-                      <Link
-                        href={`/projects/${c.CampaignAddress}`}
-                        className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1 bg-primary text-white rounded text-sm hover:bg-primary/90"
-                      >
-                        View <ChevronRight className="w-4 h-4" />
-                      </Link>
+                      <p className="mt-0.5 text-xs text-foreground/50">
+                        Created on{" "}
+                        {new Date(Number(c.creationTime) * 1000).toLocaleDateString()}
+                      </p>
                     </div>
 
-
-                      {/* PROGRESS BAR */}
-                      <div className="mt-3">
-                        <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div
-                            className={`h-full ${
-                              st.progressClamped >= 100
-                                ? "bg-green-500"
-                                : "bg-primary"
-                            }`}
-                            style={{ width: `${st.progressClamped}%` }}
-                          />
-                        </div>
-
-                        <div className="mt-2 text-xs text-foreground/70">
-                          {st.progressClamped.toFixed(0)}% funded •{" "}
-                          {st.balanceEth} / {st.goalEth} ETH
-                        </div>
-                      </div>
-
-                      {/* STATUS */}
-                      <div className="mt-3 text-xs text-foreground/60">
-                        Status:{" "}
-                        <span className="font-medium">
-                          {st.status === 0
-                            ? "Active"
-                            : st.status === 1
-                            ? "Successful"
-                            : "Failed"}
+                    {/* PROGRESS */}
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-foreground/70 mb-1">
+                        <span>Funding progress</span>
+                        <span className="font-medium text-foreground">
+                          {st.progressClamped.toFixed(0)}%
                         </span>
                       </div>
-                    </article>
+
+                      <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            st.progressClamped >= 100
+                              ? "bg-green-500"
+                              : "bg-primary"
+                          }`}
+                          style={{ width: `${st.progressClamped}%` }}
+                        />
+                      </div>
+
+                      <p className="mt-1 text-xs text-foreground/60">
+                        {st.balanceEth} / {st.goalEth} ETH raised
+                      </p>
+                    </div>
+
+                    {/* FOOTER */}
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                      {/* STATUS */}
+                      <span
+                        className={`text-xs font-medium px-2 py-0.5 rounded-full
+                          ${
+                            st.status === 0
+                              ? "bg-blue-50 text-blue-700"
+                              : st.status === 1
+                              ? "bg-green-50 text-green-700"
+                              : "bg-red-50 text-red-700"
+                          }
+                        `}
+                      >
+                        {st.status === 0
+                          ? "Active"
+                          : st.status === 1
+                          ? "Successful"
+                          : "Failed"}
+                      </span>
+
+                      {/* CTA */}
+                      <Link
+                        href={`/projects/${c.CampaignAddress}`}
+                        className="text-sm font-medium text-primary hover:underline"
+                      >
+                        View →
+                      </Link>
+                    </div>
+                  </article>
                   );
                 })}
             </div>
